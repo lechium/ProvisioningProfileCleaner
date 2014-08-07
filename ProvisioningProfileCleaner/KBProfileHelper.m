@@ -110,15 +110,20 @@
  
  */
 
-
 - (int)processProfiles
+{
+    return [self processProfilesWithOpen:TRUE];
+}
+
+- (int)processProfilesWithOpen:(BOOL)openBool
 {
     NSArray *validProfiles = [self validProfilePaths];
     DLog(@"Valid Profiles: %@", validProfiles);
     NSMutableString *logString = [NSMutableString new];
+    NSString *ourLog = [KBProfileHelper mobileDeviceLog];
     if (expiredProfiles.count > 0)
     {
-        NSString *expiredLog = [[self expiredProvisioningProfiles] stringByAppendingPathComponent:@"Expired.log"];
+       // NSString *expiredLog = [[self expiredProvisioningProfiles] stringByAppendingPathComponent:@"Expired.log"];
         [logString appendString:@"The following provisioning profiles have expired:\n---------------------------------------------------\n\n"];
         for (NSDictionary *expiredDict in expiredProfiles)
         {
@@ -137,13 +142,14 @@
             [logString appendString:profileInfo];
             
         }
-        [logString writeToFile:expiredLog atomically:true encoding:NSUTF8StringEncoding error:nil];
-        [logString clearString];
+        [logString appendString:@"\n\n"];
+        [logString writeToFile:ourLog atomically:true encoding:NSUTF8StringEncoding error:nil];
+       // [logString clearString];
     }
     
     if (duplicateProfiles.count > 0)
     {
-        NSString *duplicateLog = [[self duplicateProvisioningProfiles] stringByAppendingPathComponent:@"Duplicates.log"];
+     //   NSString *duplicateLog = [[self duplicateProvisioningProfiles] stringByAppendingPathComponent:@"Duplicates.log"];
         [logString appendString:@"The following provisioning profiles have newer duplicates:\n---------------------------------------------------\n\n"];
         for (NSDictionary *duplicateDict in duplicateProfiles)
         {
@@ -162,13 +168,14 @@
             [logString appendString:profileInfo];
             
         }
-        [logString writeToFile:duplicateLog atomically:true encoding:NSUTF8StringEncoding error:nil];
-        [logString clearString];
+        [logString appendString:@"\n\n"];
+        [logString writeToFile:ourLog atomically:true encoding:NSUTF8StringEncoding error:nil];
+        //[logString clearString];
     }
     
     if (invalidProfiles.count > 0)
     {
-        NSString *invalidLog = [[self invalidProvisioningProfiles] stringByAppendingPathComponent:@"Invalid.log"];
+       // NSString *invalidLog = [[self invalidProvisioningProfiles] stringByAppendingPathComponent:@"Invalid.log"];
         [logString appendString:@"The following provisioning profiles are invalid:\n---------------------------------------------------\n\n"];
         for (NSDictionary *invalidDict in invalidProfiles)
         {
@@ -187,12 +194,14 @@
             [logString appendString:profileInfo];
             
         }
-        [logString writeToFile:invalidLog atomically:true encoding:NSUTF8StringEncoding error:nil];
+        [logString writeToFile:ourLog atomically:true encoding:NSUTF8StringEncoding error:nil];
         
     }
     
-    NSString *openPath = [NSString stringWithFormat:@"/usr/bin/open '%@'", [self provisioningProfilesPath]];
-    system([openPath UTF8String]);
+    if (openBool == TRUE){
+        NSString *openPath = [NSString stringWithFormat:@"/usr/bin/open '%@'", [self provisioningProfilesPath]];
+        system([openPath UTF8String]);
+    }
     return 0;
 }
 
@@ -274,6 +283,10 @@
     return theDir;
 }
 
++ (NSString *)mobileDeviceLog
+{
+    return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/MobileDevice/Cleanup.log"];
+}
 
 - (NSString *)provisioningProfilesPath
 {

@@ -11,6 +11,11 @@
 		323932D61993CFA000BD549E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 323932D51993CFA000BD549E /* main.m */; };
 		323932DA1993CFA000BD549E /* ProvisioningProfileCleaner.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 323932D91993CFA000BD549E /* ProvisioningProfileCleaner.1 */; };
 		323932E21993CFC000BD549E /* KBProfileHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 323932E11993CFC000BD549E /* KBProfileHelper.m */; };
+		323932E919940A6600BD549E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 323932E819940A6600BD549E /* AppKit.framework */; };
+		323932EA19940A6600BD549E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 323932D21993CF9F00BD549E /* Foundation.framework */; };
+		323932F019940A6600BD549E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 323932EE19940A6600BD549E /* InfoPlist.strings */; };
+		323932F319940A6600BD549E /* XCProfileCleaner.m in Sources */ = {isa = PBXBuildFile; fileRef = 323932F219940A6600BD549E /* XCProfileCleaner.m */; };
+		323932F819940C4800BD549E /* KBProfileHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 323932E11993CFC000BD549E /* KBProfileHelper.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +39,13 @@
 		323932D91993CFA000BD549E /* ProvisioningProfileCleaner.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ProvisioningProfileCleaner.1; sourceTree = "<group>"; };
 		323932E01993CFC000BD549E /* KBProfileHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KBProfileHelper.h; sourceTree = "<group>"; };
 		323932E11993CFC000BD549E /* KBProfileHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBProfileHelper.m; sourceTree = "<group>"; };
+		323932E719940A6600BD549E /* XCProfileCleaner.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XCProfileCleaner.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		323932E819940A6600BD549E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		323932ED19940A6600BD549E /* XCProfileCleaner-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "XCProfileCleaner-Info.plist"; sourceTree = "<group>"; };
+		323932EF19940A6600BD549E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		323932F119940A6600BD549E /* XCProfileCleaner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XCProfileCleaner.h; sourceTree = "<group>"; };
+		323932F219940A6600BD549E /* XCProfileCleaner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XCProfileCleaner.m; sourceTree = "<group>"; };
+		323932F419940A6600BD549E /* XCProfileCleaner-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XCProfileCleaner-Prefix.pch"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +57,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		323932E419940A6600BD549E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				323932E919940A6600BD549E /* AppKit.framework in Frameworks */,
+				323932EA19940A6600BD549E /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -52,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				323932D41993CF9F00BD549E /* ProvisioningProfileCleaner */,
+				323932EB19940A6600BD549E /* XCProfileCleaner */,
 				323932D11993CF9F00BD549E /* Frameworks */,
 				323932D01993CF9F00BD549E /* Products */,
 			);
@@ -61,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				323932CF1993CF9F00BD549E /* ProvisioningProfileCleaner */,
+				323932E719940A6600BD549E /* XCProfileCleaner.xcplugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -69,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				323932D21993CF9F00BD549E /* Foundation.framework */,
+				323932E819940A6600BD549E /* AppKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -93,6 +117,26 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		323932EB19940A6600BD549E /* XCProfileCleaner */ = {
+			isa = PBXGroup;
+			children = (
+				323932F119940A6600BD549E /* XCProfileCleaner.h */,
+				323932F219940A6600BD549E /* XCProfileCleaner.m */,
+				323932EC19940A6600BD549E /* Supporting Files */,
+			);
+			path = XCProfileCleaner;
+			sourceTree = "<group>";
+		};
+		323932EC19940A6600BD549E /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				323932ED19940A6600BD549E /* XCProfileCleaner-Info.plist */,
+				323932EE19940A6600BD549E /* InfoPlist.strings */,
+				323932F419940A6600BD549E /* XCProfileCleaner-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -112,6 +156,23 @@
 			productName = ProvisioningProfileCleaner;
 			productReference = 323932CF1993CF9F00BD549E /* ProvisioningProfileCleaner */;
 			productType = "com.apple.product-type.tool";
+		};
+		323932E619940A6600BD549E /* XCProfileCleaner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 323932F719940A6600BD549E /* Build configuration list for PBXNativeTarget "XCProfileCleaner" */;
+			buildPhases = (
+				323932E319940A6600BD549E /* Sources */,
+				323932E419940A6600BD549E /* Frameworks */,
+				323932E519940A6600BD549E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = XCProfileCleaner;
+			productName = XCProfileCleaner;
+			productReference = 323932E719940A6600BD549E /* XCProfileCleaner.xcplugin */;
+			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
@@ -134,10 +195,22 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				323932E619940A6600BD549E /* XCProfileCleaner */,
 				323932CE1993CF9F00BD549E /* ProvisioningProfileCleaner */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		323932E519940A6600BD549E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				323932F019940A6600BD549E /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		323932CB1993CF9F00BD549E /* Sources */ = {
@@ -149,7 +222,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		323932E319940A6600BD549E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				323932F819940C4800BD549E /* KBProfileHelper.m in Sources */,
+				323932F319940A6600BD549E /* XCProfileCleaner.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		323932EE19940A6600BD549E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				323932EF19940A6600BD549E /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		323932DB1993CFA000BD549E /* Debug */ = {
@@ -240,6 +333,40 @@
 			};
 			name = Release;
 		};
+		323932F519940A6600BD549E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = "$(HOME)";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "XCProfileCleaner/XCProfileCleaner-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "XCProfileCleaner/XCProfileCleaner-Info.plist";
+				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xcplugin;
+			};
+			name = Debug;
+		};
+		323932F619940A6600BD549E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = "$(HOME)";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "XCProfileCleaner/XCProfileCleaner-Prefix.pch";
+				INFOPLIST_FILE = "XCProfileCleaner/XCProfileCleaner-Info.plist";
+				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xcplugin;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -257,6 +384,15 @@
 			buildConfigurations = (
 				323932DE1993CFA000BD549E /* Debug */,
 				323932DF1993CFA000BD549E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		323932F719940A6600BD549E /* Build configuration list for PBXNativeTarget "XCProfileCleaner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				323932F519940A6600BD549E /* Debug */,
+				323932F619940A6600BD549E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};

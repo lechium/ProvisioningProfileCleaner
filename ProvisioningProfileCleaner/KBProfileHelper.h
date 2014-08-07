@@ -15,4 +15,6 @@
     NSArray *duplicateProfiles;
 }
 - (int)processProfiles;
+- (int)processProfilesWithOpen:(BOOL)openBool;
++ (NSString *)mobileDeviceLog;
 @end
