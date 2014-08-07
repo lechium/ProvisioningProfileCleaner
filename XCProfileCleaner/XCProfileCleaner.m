@@ -40,8 +40,8 @@ static XCProfileCleaner *sharedPlugin;
         NSMenuItem *menuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
         if (menuItem) {
             [[menuItem submenu] addItem:[NSMenuItem separatorItem]];
-            NSMenuItem *actionMenuItem = [[NSMenuItem alloc] initWithTitle:@"Clean provisioning profiles..." action:@selector(cleanProfiles) keyEquivalent:@"C"];
-            [actionMenuItem setKeyEquivalentModifierMask:NSControlKeyMask | NSCommandKeyMask | NSShiftKeyMask];
+            NSMenuItem *actionMenuItem = [[NSMenuItem alloc] initWithTitle:@"Clean provisioning profiles..." action:@selector(cleanProfiles) keyEquivalent:@"c"];
+            [actionMenuItem setKeyEquivalentModifierMask: NSCommandKeyMask | NSShiftKeyMask | NSAlternateKeyMask];
             [actionMenuItem setTarget:self];
             [[menuItem submenu] addItem:actionMenuItem];
         }
