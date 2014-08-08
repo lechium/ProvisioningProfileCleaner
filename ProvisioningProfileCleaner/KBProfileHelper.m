@@ -225,6 +225,19 @@
     return 0;
 }
 
++ (NSString *)iphoneDeveloperString
+{
+    NSArray *devCertsArray = [self devCertsFull];
+    for (NSString *devCert in devCertsArray)
+    {
+        if ([devCert rangeOfString:@"iPhone Developer:"].location != NSNotFound)
+        {
+            return devCert;
+        }
+    }
+    return nil;
+}
+
 + (NSArray *)devCertsFull
 {
     NSMutableArray *outputArray = [[NSMutableArray alloc ]init];

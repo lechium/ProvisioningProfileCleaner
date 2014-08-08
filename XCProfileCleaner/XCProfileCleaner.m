@@ -54,7 +54,7 @@ static XCProfileCleaner *sharedPlugin;
         dispatch_once(&onceToken2, ^{
             
             //turn off the swizzling for now, everything inside there is experimental.
-        //   [self doSwizzlingScience];
+          // [self doSwizzlingScience];
         });
     }
     return self;
@@ -106,6 +106,8 @@ static XCProfileCleaner *sharedPlugin;
     id rlsTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Release"];
     NSString *provProfile = [debugTargetContext expandedValueForPropertyNamed:@"PROVISIONING_PROFILE"];
     NSString *codeSignID = [debugTargetContext expandedValueForPropertyNamed:@"CODE_SIGN_IDENTITY"];
+    BOOL definitelyNotDistributionProfile = FALSE;
+ 
   
     if ([devCerts containsObject:codeSignID])
     {
@@ -115,6 +117,19 @@ static XCProfileCleaner *sharedPlugin;
     
     NSDictionary *currentProvProfile = [KBProfileHelper provisioningDictionaryFromFilePath:[KBProfileHelper pathFromUUID:provProfile]];
   
+    if ([openedProfile[@"DeveloperCertificates"]count] > 1)
+    {
+        //can at least identify that the incoming profile isnt a distro profile. the last issue is there is no reference to individual names / ID's in
+        //provisioning profile plist :(
+        definitelyNotDistributionProfile = TRUE;
+        NSLog(@"#### incoming profile is DEFINITELY a developer profile");
+        NSString *iphoneDevCert = [KBProfileHelper iphoneDeveloperString];
+        NSLog(@"#### would probably be safe to assume we should change to this cert if its not the current one; %@", iphoneDevCert);
+        if ([iphoneDevCert isEqualToString:codeSignID])
+        {
+            NSLog(@"#### ids already match!");
+        }
+    }
     NSString *certID = [openedProfile[@"TeamIdentifier"] lastObject];
     NSString *teamName = openedProfile[@"TeamName"];
     NSString *incomingProfile = openedProfile[@"UUID"];

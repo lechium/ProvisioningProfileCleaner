@@ -21,4 +21,5 @@
 + (NSArray *)devCertsFull;
 + (NSString *)provisioningProfilesPath;
 + (NSString *)pathFromUUID:(NSString *)uuid;
++ (NSString *)iphoneDeveloperString;
 @end
