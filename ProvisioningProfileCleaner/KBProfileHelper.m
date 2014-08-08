@@ -225,6 +225,26 @@
     return 0;
 }
 
++ (NSArray *)devCertsFull
+{
+    NSMutableArray *outputArray = [[NSMutableArray alloc ]init];
+    NSArray *securityReturn = [KBProfileHelper returnForProcess:@"security find-identity -p codesigning -v"];
+    for (NSString *profileLine in securityReturn)
+    {
+        if (profileLine.length > 0)
+        {
+            NSArray *clips = [profileLine componentsSeparatedByString:@"\""];
+            if ([clips count] > 1)
+            {
+                NSString *clipIt = [[profileLine componentsSeparatedByString:@"\""] objectAtIndex:1];
+                [outputArray addObject:clipIt];
+            }
+        }
+        
+    }
+    return outputArray;
+}
+
 - (NSArray *)devCerts
 {
     NSMutableArray *outputArray = [[NSMutableArray alloc ]init];
@@ -308,6 +328,11 @@
     return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/MobileDevice/Cleanup.log"];
 }
 
++ (NSString *)provisioningProfilesPath
+{
+    return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/MobileDevice/Provisioning Profiles"];
+}
+
 - (NSString *)provisioningProfilesPath
 {
     return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/MobileDevice/Provisioning Profiles"];
@@ -330,7 +355,7 @@
         if ([[[theObject pathExtension] lowercaseString] isEqualToString:@"mobileprovision"])
         {
             NSString *fullPath = [profileDir stringByAppendingPathComponent:theObject];
-            NSMutableDictionary *provisionDict = [self provisioningDictionaryFromFilePath:
+            NSMutableDictionary *provisionDict = [KBProfileHelper provisioningDictionaryFromFilePath:
                                            [profileDir stringByAppendingPathComponent:theObject]];
             [provisionDict removeObjectForKey:@"DeveloperCertificates"];
             NSString *teamId = [provisionDict[@"TeamIdentifier"] lastObject];
@@ -404,6 +429,11 @@
     return profileArray;
 }
 
++ (NSString *)pathFromUUID:(NSString *)uuid
+{
+    return [[[self provisioningProfilesPath] stringByAppendingPathComponent:uuid] stringByAppendingPathExtension:@"mobileprovision"];
+}
+
 //sort of obsolete, used to take the valid profiles and copy them out for the original POC
 
 - (NSArray *)validProfilePaths
@@ -418,9 +448,10 @@
     return pathArray;
 }
 
+
 //take that profile and chop off the top and bottom "junk" data to get at the <?xml -> </plist> portion that we need.
 
-- (NSMutableDictionary *)provisioningDictionaryFromFilePath:(NSString *)profilePath
++ (NSMutableDictionary *)provisioningDictionaryFromFilePath:(NSString *)profilePath
 {
     NSString *fileContents = [NSString stringWithContentsOfFile:profilePath encoding:NSASCIIStringEncoding error:nil];
     NSUInteger fileLength = [fileContents length];

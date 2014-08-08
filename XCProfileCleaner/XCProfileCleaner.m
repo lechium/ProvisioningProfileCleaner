@@ -7,6 +7,10 @@
 //
 
 #import "XCProfileCleaner.h"
+#import "JRSwizzle.h"
+#import <objc/runtime.h>
+#import "XCPCModel.h"
+
 #import "KBProfileHelper.h"
 static XCProfileCleaner *sharedPlugin;
 
@@ -45,10 +49,174 @@ static XCProfileCleaner *sharedPlugin;
             [actionMenuItem setTarget:self];
             [[menuItem submenu] addItem:actionMenuItem];
         }
+        
+        static dispatch_once_t onceToken2;
+        dispatch_once(&onceToken2, ^{
+            
+            //turn off the swizzling for now, everything inside there is experimental.
+        //   [self doSwizzlingScience];
+        });
     }
     return self;
 }
 
+/*
+ 
+ TeamName,
+ ExpirationDate,
+ TimeToLive,
+ AppIDName,
+ CreationDate,
+ DeveloperCertificates,
+ ProvisionedDevices,
+ Name,
+ ApplicationIdentifierPrefix,
+ Version,
+ UUID,
+ TeamIdentifier,
+ Entitlements {
+ application-identifier,
+ get-task-allow,
+ }
+ 
+ 
+ */
+
+- (void)processProfile:(NSString *)theFile
+{
+    Class pbxProjClass = objc_getClass("PBXProject");
+    Class macroClass = objc_getClass("DVTMacroDefinitionConditionSet");
+    NSArray *devCerts = [KBProfileHelper devCertsFull];
+    NSDictionary *openedProfile = [KBProfileHelper provisioningDictionaryFromFilePath:theFile];
+    NSString *openProfileName = openedProfile[@"Name"];
+    NSString *projectFile = [XCPCModel currentProjectFile];
+    
+    BOOL currentProfileValid = FALSE;
+    BOOL incomingProfileValid = FALSE;
+    BOOL codesignIDChanged = TRUE;
+    NSLog(@"##### PROJECTFILE: %@", projectFile);
+    
+    NSString *projectName = [XCPCModel currentProjectName];
+    
+    id project = [pbxProjClass projectWithFile:projectFile];
+    NSString *productName = [project name];
+    id conditionSet = [macroClass conditionSetFromStringRepresentation:@"[sdk=iphoneos*]" getBaseMacroName:nil error:nil];
+    id cmdTarget = [project targetNamed: productName];
+    id debugTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Debug"];
+    id rlsTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Release"];
+    NSString *provProfile = [debugTargetContext expandedValueForPropertyNamed:@"PROVISIONING_PROFILE"];
+    NSString *codeSignID = [debugTargetContext expandedValueForPropertyNamed:@"CODE_SIGN_IDENTITY"];
+  
+    if ([devCerts containsObject:codeSignID])
+    {
+        NSLog(@"current project codesign value is valid: %@", codeSignID);
+        currentProfileValid = TRUE;
+    }
+    
+    NSDictionary *currentProvProfile = [KBProfileHelper provisioningDictionaryFromFilePath:[KBProfileHelper pathFromUUID:provProfile]];
+  
+    NSString *certID = [openedProfile[@"TeamIdentifier"] lastObject];
+    NSString *teamName = openedProfile[@"TeamName"];
+    NSString *incomingProfile = openedProfile[@"UUID"];
+    NSString *fullID = [NSString stringWithFormat:@"%@ (%@)", teamName, certID];
+    NSLog(@"fullID: %@", fullID);
+   
+    if ([devCerts containsObject:fullID])
+    {
+        NSLog(@"We have a valid codesign ID for this new cert!");
+        incomingProfileValid = TRUE;
+    }
+    //NSLog(@"devCerts: %@", devCerts);
+    
+    if ([codeSignID isEqualToString:fullID])
+    {
+        NSLog(@"code sign ID should not change");
+        codesignIDChanged = FALSE;
+    }
+
+    NSString *profileName = currentProvProfile[@"Name"];
+    
+    if ([openProfileName isEqualToString:profileName])
+    {
+        NSLog(@"#### Frontmost Project: %@ uses the profile: %@", projectName, profileName);
+        
+        if (incomingProfileValid == TRUE)
+        {
+            NSLog(@"updating project to new profile!");
+            [debugTargetContext setValue:incomingProfile forPropertyName:@"PROVISIONING_PROFILE"];
+            
+            if (codesignIDChanged == TRUE)
+            {
+                [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY"];
+                [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
+            }
+            
+            return;
+            
+        }
+        
+    }
+    
+    if (currentProfileValid == FALSE)
+    {
+        [debugTargetContext setValue:incomingProfile forPropertyName:@"PROVISIONING_PROFILE"];
+        
+        if (codesignIDChanged == TRUE)
+        {
+            [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY"];
+            [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
+        }
+    }
+    
+    
+
+}
+
+- (BOOL)newOurApplication:(NSApplication *)sender openFiles:(NSArray *)filenames
+{
+    NSLog(@"newOurApplication:openFiles:");
+    BOOL orig = [self newOurApplication:sender openFiles:filenames]; // call original method;
+    NSString *filename = [filenames lastObject];
+    NSLog(@"filename: %@", filename);
+    if ([[[filename pathExtension] lowercaseString] isEqualToString:@"mobileprovision"])
+    {
+       //do extra stuff
+          NSLog(@"do extra stuff: %@", filename);
+        [sharedPlugin processProfile:filenames.lastObject];
+        
+   // } else {
+        
+     //   orig = [self newOurApplication:sender openFiles:filenames];
+    }
+    
+    return orig;
+}
+
+- (void)doSwizzlingScience
+{
+    
+    Class xcAppClass = objc_getClass("IDEApplicationController");
+    NSError *theError = nil;
+    
+    BOOL swizzleScience = FALSE;
+    
+    
+    Method ourFilesOpenReplacement = class_getInstanceMethod([self class], @selector(newOurApplication:openFiles:));
+    class_addMethod(xcAppClass, @selector(newOurApplication:openFiles:), method_getImplementation(ourFilesOpenReplacement), method_getTypeEncoding(ourFilesOpenReplacement));
+    
+    swizzleScience = [xcAppClass jr_swizzleMethod:@selector(application:openFiles:) withMethod:@selector(newOurApplication:openFiles:) error:&theError];
+    
+    if (swizzleScience == TRUE)
+    {
+        NSLog(@"IDEApplicationController ourApplication:openFiles: replaced!");
+    } else {
+        
+        NSLog(@"IDEApplicationController ourApplication:openFiles: failed to replace with error(: %@", theError);
+    }
+    
+  
+    
+}
 - (void)showProfileSuccessAlert
 {
     NSAlert *alert = [NSAlert alertWithMessageText:@"Profile clean completed!" defaultButton:@"Yes" alternateButton:@"No" otherButton:nil informativeTextWithFormat:@"Your provisioning profile folder has been cleaned, it is recommended to quit Xcode before you continue.\n Would you like to see the detail log?"];

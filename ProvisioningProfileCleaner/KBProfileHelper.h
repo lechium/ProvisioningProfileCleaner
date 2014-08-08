@@ -17,4 +17,8 @@
 - (int)processProfiles;
 - (int)processProfilesWithOpen:(BOOL)openBool;
 + (NSString *)mobileDeviceLog;
++ (NSMutableDictionary *)provisioningDictionaryFromFilePath:(NSString *)profilePath;
++ (NSArray *)devCertsFull;
++ (NSString *)provisioningProfilesPath;
++ (NSString *)pathFromUUID:(NSString *)uuid;
 @end

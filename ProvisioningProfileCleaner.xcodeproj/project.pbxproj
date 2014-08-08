@@ -16,6 +16,10 @@
 		323932F019940A6600BD549E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 323932EE19940A6600BD549E /* InfoPlist.strings */; };
 		323932F319940A6600BD549E /* XCProfileCleaner.m in Sources */ = {isa = PBXBuildFile; fileRef = 323932F219940A6600BD549E /* XCProfileCleaner.m */; };
 		323932F819940C4800BD549E /* KBProfileHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 323932E11993CFC000BD549E /* KBProfileHelper.m */; };
+		327422D71995743B00527711 /* XCPCModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 327422D61995743B00527711 /* XCPCModel.m */; };
+		327422DA1995747E00527711 /* XCPCProjectSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 327422D91995747E00527711 /* XCPCProjectSetting.m */; };
+		327422DD1995751300527711 /* NSData+Split.m in Sources */ = {isa = PBXBuildFile; fileRef = 327422DC1995751300527711 /* NSData+Split.m */; };
+		32FAA1D3199541120041ECDB /* JRSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FAA1D2199541120041ECDB /* JRSwizzle.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,6 +50,14 @@
 		323932F119940A6600BD549E /* XCProfileCleaner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XCProfileCleaner.h; sourceTree = "<group>"; };
 		323932F219940A6600BD549E /* XCProfileCleaner.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XCProfileCleaner.m; sourceTree = "<group>"; };
 		323932F419940A6600BD549E /* XCProfileCleaner-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XCProfileCleaner-Prefix.pch"; sourceTree = "<group>"; };
+		327422D51995743B00527711 /* XCPCModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCPCModel.h; sourceTree = "<group>"; };
+		327422D61995743B00527711 /* XCPCModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCPCModel.m; sourceTree = "<group>"; };
+		327422D81995747E00527711 /* XCPCProjectSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCPCProjectSetting.h; sourceTree = "<group>"; };
+		327422D91995747E00527711 /* XCPCProjectSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCPCProjectSetting.m; sourceTree = "<group>"; };
+		327422DB1995751300527711 /* NSData+Split.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Split.h"; sourceTree = "<group>"; };
+		327422DC1995751300527711 /* NSData+Split.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Split.m"; sourceTree = "<group>"; };
+		32FAA1D1199541120041ECDB /* JRSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JRSwizzle.h; path = XCProfileCleaner/JRSwizzle.h; sourceTree = SOURCE_ROOT; };
+		32FAA1D2199541120041ECDB /* JRSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JRSwizzle.m; path = XCProfileCleaner/JRSwizzle.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +132,14 @@
 		323932EB19940A6600BD549E /* XCProfileCleaner */ = {
 			isa = PBXGroup;
 			children = (
+				327422DB1995751300527711 /* NSData+Split.h */,
+				327422DC1995751300527711 /* NSData+Split.m */,
+				327422D81995747E00527711 /* XCPCProjectSetting.h */,
+				327422D91995747E00527711 /* XCPCProjectSetting.m */,
+				327422D51995743B00527711 /* XCPCModel.h */,
+				327422D61995743B00527711 /* XCPCModel.m */,
+				32FAA1D1199541120041ECDB /* JRSwizzle.h */,
+				32FAA1D2199541120041ECDB /* JRSwizzle.m */,
 				323932F119940A6600BD549E /* XCProfileCleaner.h */,
 				323932F219940A6600BD549E /* XCProfileCleaner.m */,
 				323932EC19940A6600BD549E /* Supporting Files */,
@@ -227,6 +247,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				323932F819940C4800BD549E /* KBProfileHelper.m in Sources */,
+				327422DD1995751300527711 /* NSData+Split.m in Sources */,
+				327422DA1995747E00527711 /* XCPCProjectSetting.m in Sources */,
+				327422D71995743B00527711 /* XCPCModel.m in Sources */,
+				32FAA1D3199541120041ECDB /* JRSwizzle.m in Sources */,
 				323932F319940A6600BD549E /* XCProfileCleaner.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -395,6 +419,7 @@
 				323932F619940A6600BD549E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
