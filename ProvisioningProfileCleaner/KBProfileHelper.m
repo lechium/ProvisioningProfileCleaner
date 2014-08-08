@@ -12,6 +12,8 @@
 
 #define DLog(format, ...) CFShow((__bridge CFStringRef)[NSString stringWithFormat:format, ## __VA_ARGS__]);
 
+//was used when different files were maintained for each log, easy way to clear out contents of mutable string
+
 @interface NSMutableString (profileHelper)
 
 - (void)clearString;
@@ -31,6 +33,8 @@
 @end
 
 @implementation NSString (profileHelper)
+
+//convert basic XML plist string from the profile and convert it into a mutable nsdictionary
 
 - (id)dictionaryFromString
 {
@@ -54,6 +58,9 @@
 
 @implementation NSArray (profileHelper)
 
+
+//filter subarray based on what contacts have that particular name sorted ascending by creation date. used to easily sort the top most object as far as date created when doing profile comparisons
+
 - (NSArray *)subarrayWithName:(NSString *)theName
 {
     NSPredicate *filterPredicate = [NSPredicate predicateWithFormat:@"(Name == %@)", theName];
@@ -66,6 +73,8 @@
 
 
 @implementation KBProfileHelper
+
+//super small / lightweight easy replacement for using an NSTask to get data back out of a cli utilility
 
 + (NSArray *)returnForProcess:(NSString *)call
 {
@@ -115,12 +124,19 @@
     return [self processProfilesWithOpen:TRUE];
 }
 
+//actually process the expiredProfiles / duplicateProfiles / invalid profiles here, these are set in validProfiles (kind of a hack, but it works)
+
 - (int)processProfilesWithOpen:(BOOL)openBool
 {
+    //not really used for anything other than logging purposes, in the old version of this i would copy the valid profiles to a different folder.
     NSArray *validProfiles = [self validProfilePaths];
     DLog(@"Valid Profiles: %@", validProfiles);
     NSMutableString *logString = [NSMutableString new];
+    //write all the logs to here
     NSString *ourLog = [KBProfileHelper mobileDeviceLog];
+    
+    //process expired profiles
+    
     if (expiredProfiles.count > 0)
     {
        // NSString *expiredLog = [[self expiredProvisioningProfiles] stringByAppendingPathComponent:@"Expired.log"];
@@ -147,6 +163,8 @@
        // [logString clearString];
     }
     
+     //process duplicate profiles
+    
     if (duplicateProfiles.count > 0)
     {
      //   NSString *duplicateLog = [[self duplicateProvisioningProfiles] stringByAppendingPathComponent:@"Duplicates.log"];
@@ -172,6 +190,8 @@
         [logString writeToFile:ourLog atomically:true encoding:NSUTF8StringEncoding error:nil];
         //[logString clearString];
     }
+    
+    //process invalid profiles
     
     if (invalidProfiles.count > 0)
     {
@@ -293,6 +313,8 @@
     return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/MobileDevice/Provisioning Profiles"];
 }
 
+//this is where all the arrays are created of who is valid, invalid, duplicate etc...
+
 - (NSArray *)validProfiles
 {
     NSMutableArray *profileArray = [NSMutableArray new];
@@ -324,11 +346,14 @@
                 
             } else {
                 
+                //its expired, who cares about any of the other details. add it to the expired list.
+                
                 DLog(@"expired: %@\n", expireDate);
                 [_expired addObject:provisionDict];
                 expired = TRUE;
             }
             
+            //check to see if our valid non expired certificates in our keychain are referenced by the profile, or if its expired
             
             if (![devCert containsObject:teamId] || expired == TRUE)
             {
@@ -338,9 +363,9 @@
                 }
                 DLog(@"invalid or expired cert: %@\n", theObject );
                 
-            } else {
+            } else { //we got this far the profile is not expired and can be compared against other potential duplicates
                 
-                if ([profileNames containsObject:name])
+                if ([profileNames containsObject:name]) //we have this profile already, is ours newer or is the one already in our collection newer?
                 {
                     NSDictionary *otherDict = [[profileArray subarrayWithName:name] objectAtIndex:0];
                     NSDate *previousCreationDate = otherDict[@"CreationDate"];
@@ -379,6 +404,8 @@
     return profileArray;
 }
 
+//sort of obsolete, used to take the valid profiles and copy them out for the original POC
+
 - (NSArray *)validProfilePaths
 {
     NSMutableArray *pathArray = [NSMutableArray new];
@@ -390,6 +417,8 @@
     }
     return pathArray;
 }
+
+//take that profile and chop off the top and bottom "junk" data to get at the <?xml -> </plist> portion that we need.
 
 - (NSMutableDictionary *)provisioningDictionaryFromFilePath:(NSString *)profilePath
 {
