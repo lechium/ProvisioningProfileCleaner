@@ -1,9 +1,9 @@
 ProvisioningProfileCleaner
 ==========================
 
-Command line tool to clean up your Provisioning profile folder!
+Command line tool / Xcode Plugin to clean up your Provisioning profile folder!
 
-Run it from anywhere (even just run it in Xcode) and it will take your profiles in ~/Library/MobileDevice/Provisioning Profiles and organize them
+Run it from anywhere (even just run / build it in Xcode) and it will take your profiles in ~/Library/MobileDevice/Provisioning Profiles and organize them
 into Duplicate Profiles / Expired Profiles / Invalid Profiles folders as necessary. 
 
 - Expired Profiles are passed their expiration date and are no longer valid.
