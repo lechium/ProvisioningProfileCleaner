@@ -351,6 +351,65 @@
     return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/MobileDevice/Provisioning Profiles"];
 }
 
+/**
+ 
+ go through DeveloperCertificates NSArray key in the mobileprovision file and loops through them one by one
+ inside of this loop we run an additional loop through all of our valid cert profiles in our keychain, if we find 
+ the range of our string in the raw data of the cert we return that as the valid id, no need to process any data after
+ that point.
+ 
+ */
+
++ (NSString *)validIDFromCerts:(NSArray *)devCerts
+{
+    NSArray *validDevCerts = [KBProfileHelper devCertsFull];
+    for (NSData *devCert in devCerts)
+    {
+        for (NSString *currentValidCert in validDevCerts)
+        {
+            NSData *distroData = [currentValidCert dataUsingEncoding:NSUTF8StringEncoding];
+            NSRange searchRange = NSMakeRange(0, devCert.length);
+            NSRange dataRange = [devCert rangeOfData:distroData options:0 range:searchRange];
+            if (dataRange.location != NSNotFound)
+            {
+                DLog(@"found profile: %@", currentValidCert);
+                return currentValidCert;
+            }
+        }
+    }
+    return nil;
+}
+
+/**
+ 
+ go through DeveloperCertificates NSArray key in the mobileprovision file to determine what valid ID's it contains, this will mainly
+ be used for logging purposes if we don't find a valid cert
+ 
+ */
+
++ (NSArray *)certIDsFromCerts:(NSArray *)devCerts
+{
+    NSMutableArray *certIDs = [NSMutableArray new];
+    
+    for (NSData *devCert in devCerts)
+    {
+        //the origin offset of iPhone Developer: / iPhone Distribution / 3rd Party Mac Developer Application: appears to be the same in ever raw cert
+        //we grab way too much data on purpose since we have no idea how long the names appended will be.
+        NSData *userData = [devCert subdataWithRange:NSMakeRange(0x00109, 100)];
+        
+        NSString *stringData = [[NSString alloc] initWithData:userData encoding:NSASCIIStringEncoding];
+        //grab all the way up to ), split, grab first object, readd ) could probably do a range of string thing here too.. this works tho.
+        NSString *devName = [[[stringData componentsSeparatedByString:@")"] firstObject] stringByAppendingString:@")"];
+        if (![certIDs containsObject:devName]) //dont add any repeats
+        {
+            [certIDs addObject:devName];
+        }
+    }
+    return certIDs;
+}
+
+
+
 //this is where all the arrays are created of who is valid, invalid, duplicate etc...
 
 - (NSArray *)validProfiles
@@ -370,7 +429,8 @@
             NSString *fullPath = [profileDir stringByAppendingPathComponent:theObject];
             NSMutableDictionary *provisionDict = [KBProfileHelper provisioningDictionaryFromFilePath:
                                            [profileDir stringByAppendingPathComponent:theObject]];
-            [provisionDict removeObjectForKey:@"DeveloperCertificates"];
+            
+            NSString *csid = provisionDict[@"CODE_SIGN_IDENTITY"];
             NSString *teamId = [provisionDict[@"TeamIdentifier"] lastObject];
             NSDate *expireDate = provisionDict[@"ExpirationDate"];
             NSDate *createdDate = provisionDict[@"CreationDate"];
@@ -393,14 +453,22 @@
             
             //check to see if our valid non expired certificates in our keychain are referenced by the profile, or if its expired
             
-            if (![devCert containsObject:teamId] || expired == TRUE)
+            if (csid == nil || expired == TRUE)
             {
                 if (![_expired containsObject:provisionDict])
                 {
                     [_invalids addObject:provisionDict];
                 }
-                DLog(@"invalid or expired cert: %@\n", theObject );
+                if (csid == nil)
+                {
+            
+                    DLog(@"No valid codesigning identities found!!");
+                    
+                } else {
                 
+                    DLog(@"invalid or expired cert: %@\n", theObject );
+                
+                }
             } else { //we got this far the profile is not expired and can be compared against other potential duplicates
                 
                 if ([profileNames containsObject:name]) //we have this profile already, is ours newer or is the one already in our collection newer?
@@ -497,6 +565,26 @@
     
     //yay categories!! convert the dictionary raw string into an actual NSDictionary
     NSMutableDictionary *dict = [plistString dictionaryFromString];
+    
+    //since we will always need this data, best to grab it here and make it part of the dictionary for easy re-use / validity check.
+    
+    NSString *ourID = [self validIDFromCerts:dict[@"DeveloperCertificates"]];
+    
+    if (ourID != nil)
+    {
+        [dict setValue:ourID forKey:@"CODE_SIGN_IDENTITY"];
+    }
+    
+    //grab all the valid certs, for later logging / debugging for why a profile might be invalid
+    
+    NSArray *validCertIds = [self certIDsFromCerts:dict[@"DeveloperCertificates"]];
+    
+    [dict setValue:validCertIds forKey:@"CodeSignArray"];
+    
+    // shouldnt need this frivolous data any longer, we know which ID (if any) we have and have all the valid ones too
+    
+    [dict removeObjectForKey:@"DeveloperCertificates"];
+    
     
     
     //write to file for debug / posterity
