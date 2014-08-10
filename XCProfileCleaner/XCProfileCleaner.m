@@ -89,6 +89,11 @@ static XCProfileCleaner *sharedPlugin;
     NSArray *devCerts = [KBProfileHelper devCertsFull];
     NSDictionary *openedProfile = [KBProfileHelper provisioningDictionaryFromFilePath:theFile];
     NSString *openProfileName = openedProfile[@"Name"];
+    NSString *target = openedProfile[@"Target"];
+    
+    //modify debug/release target settings depending on whether the profile is a Distribution or Dev profile.
+    
+    if (target == nil) target = @"Debug";
     NSString *projectFile = [XCPCModel currentProjectFile];
     
     BOOL currentProfileValid = FALSE;
@@ -102,12 +107,11 @@ static XCProfileCleaner *sharedPlugin;
     NSString *productName = [project name];
     id conditionSet = [macroClass conditionSetFromStringRepresentation:@"[sdk=iphoneos*]" getBaseMacroName:nil error:nil];
     id cmdTarget = [project targetNamed: productName];
-    id debugTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Debug"];
-    id rlsTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Release"];
-    NSString *provProfile = [debugTargetContext expandedValueForPropertyNamed:@"PROVISIONING_PROFILE"];
-    NSString *codeSignID = [debugTargetContext expandedValueForPropertyNamed:@"CODE_SIGN_IDENTITY"];
-    int profileType = 0; //0 = dev, 1 = distro
- 
+    id targetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:target];
+   // id rlsTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Release"];
+    NSString *provProfile = [targetContext expandedValueForPropertyNamed:@"PROVISIONING_PROFILE"];
+    NSString *codeSignID = [targetContext expandedValueForPropertyNamed:@"CODE_SIGN_IDENTITY"];
+  
   
     if ([devCerts containsObject:codeSignID])
     {
@@ -153,12 +157,12 @@ static XCProfileCleaner *sharedPlugin;
         if (incomingProfileValid == TRUE)
         {
             NSLog(@"updating project to new profile!");
-            [debugTargetContext setValue:incomingProfile forPropertyName:@"PROVISIONING_PROFILE"];
+            [targetContext setValue:incomingProfile forPropertyName:@"PROVISIONING_PROFILE"];
             
             if (codesignIDChanged == TRUE)
             {
-                [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
-                [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
+                [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
+                [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
             }
             
             return;
@@ -169,12 +173,12 @@ static XCProfileCleaner *sharedPlugin;
     
     if (currentProfileValid == FALSE)
     {
-        [debugTargetContext setValue:incomingProfile forPropertyName:@"PROVISIONING_PROFILE"];
+        [targetContext setValue:incomingProfile forPropertyName:@"PROVISIONING_PROFILE"];
         
         if (codesignIDChanged == TRUE)
         {
-            [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
-            [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
+            [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
+            [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
         }
     }
     

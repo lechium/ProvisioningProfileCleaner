@@ -573,6 +573,15 @@
     if (ourID != nil)
     {
         [dict setValue:ourID forKey:@"CODE_SIGN_IDENTITY"];
+        //in THEORY should set the profile target to Debug or Release depending on if it finds "Developer:" string.
+        if ([ourID rangeOfString:@"Developer:"].location != NSNotFound)
+        {
+            [dict setValue:@"Debug" forKey:@"Target"];
+        
+        } else {
+        
+            [dict setValue:@"Release" forKey:@"Target"];
+        }
     }
     
     //grab all the valid certs, for later logging / debugging for why a profile might be invalid
