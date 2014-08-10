@@ -106,7 +106,7 @@ static XCProfileCleaner *sharedPlugin;
     id rlsTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Release"];
     NSString *provProfile = [debugTargetContext expandedValueForPropertyNamed:@"PROVISIONING_PROFILE"];
     NSString *codeSignID = [debugTargetContext expandedValueForPropertyNamed:@"CODE_SIGN_IDENTITY"];
-    BOOL definitelyNotDistributionProfile = FALSE;
+    int profileType = 0; //0 = dev, 1 = distro
  
   
     if ([devCerts containsObject:codeSignID])
@@ -117,33 +117,28 @@ static XCProfileCleaner *sharedPlugin;
     
     NSDictionary *currentProvProfile = [KBProfileHelper provisioningDictionaryFromFilePath:[KBProfileHelper pathFromUUID:provProfile]];
   
-    if ([openedProfile[@"DeveloperCertificates"]count] > 1)
+    NSString *openID = openedProfile[@"CODE_SIGN_IDENTITY"];
+    
+    if (openID != nil)
     {
-        //can at least identify that the incoming profile isnt a distro profile. the last issue is there is no reference to individual names / ID's in
-        //provisioning profile plist :(
-        definitelyNotDistributionProfile = TRUE;
-        NSLog(@"#### incoming profile is DEFINITELY a developer profile");
-        NSString *iphoneDevCert = [KBProfileHelper iphoneDeveloperString];
-        NSLog(@"#### would probably be safe to assume we should change to this cert if its not the current one; %@", iphoneDevCert);
-        if ([iphoneDevCert isEqualToString:codeSignID])
+        if ([openID isEqualToString:codeSignID])
         {
             NSLog(@"#### ids already match!");
         }
-    }
-    NSString *certID = [openedProfile[@"TeamIdentifier"] lastObject];
-    NSString *teamName = openedProfile[@"TeamName"];
-    NSString *incomingProfile = openedProfile[@"UUID"];
-    NSString *fullID = [NSString stringWithFormat:@"%@ (%@)", teamName, certID];
-    NSLog(@"fullID: %@", fullID);
-   
-    if ([devCerts containsObject:fullID])
-    {
         NSLog(@"We have a valid codesign ID for this new cert!");
         incomingProfileValid = TRUE;
+    } else {
+        
+        NSLog(@"incoming profile is invalid you don't have any of the following certs: %@", openedProfile[@"CodeSignArray"]);
+        incomingProfileValid = FALSE;
+        return;
+        
     }
+    NSString *incomingProfile = openedProfile[@"UUID"];
+
     //NSLog(@"devCerts: %@", devCerts);
     
-    if ([codeSignID isEqualToString:fullID])
+    if ([codeSignID isEqualToString:openID])
     {
         NSLog(@"code sign ID should not change");
         codesignIDChanged = FALSE;
@@ -162,8 +157,8 @@ static XCProfileCleaner *sharedPlugin;
             
             if (codesignIDChanged == TRUE)
             {
-                [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY"];
-                [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
+                [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
+                [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
             }
             
             return;
@@ -178,8 +173,8 @@ static XCProfileCleaner *sharedPlugin;
         
         if (codesignIDChanged == TRUE)
         {
-            [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY"];
-            [debugTargetContext setValue:fullID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
+            [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
+            [debugTargetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
         }
     }
     
