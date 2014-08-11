@@ -408,6 +408,33 @@
     return certIDs;
 }
 
+//#define ESSENTIAL_PREDICATE @"(SELF CONTAINS[c] Essential) OR (Tag contains[c] 'essential') OR (Priority == 'required') or (Package == 'com.science')"
+
+- (NSDictionary *)validProfileForID:(NSString *)appID withTarget:(NSString *)target
+{
+    NSArray *validProfiles = [self validProfiles];
+    NSPredicate *filterPredicate = [NSPredicate predicateWithFormat:@"(applicationIdentifier contains[c] '%@') or (applicationIdentifier contains[c] '*')", appID];
+    NSPredicate *targetPredicate = [NSPredicate predicateWithFormat:@"(Target == %@)", target];
+    NSArray *filterOne = [validProfiles filteredArrayUsingPredicate:filterPredicate];
+    NSArray *filterTwo = [filterOne filteredArrayUsingPredicate:targetPredicate];
+    return [filterTwo firstObject];
+}
+
+- (NSArray *)validProfilesForID:(NSString *)appID
+{
+    NSArray *validProfiles = [self validProfiles];
+    NSPredicate *filterPredicate = [NSPredicate predicateWithFormat:@"(applicationIdentifier contains[c] '%@') or (applicationIdentifier contains[c] '*')", appID];
+    NSPredicate *targetPredicate = [NSPredicate predicateWithFormat:@"(Target == %@)", @"Debug"];
+    NSArray *filterOne = [validProfiles filteredArrayUsingPredicate:filterPredicate];
+    NSArray *filterTwo = [filterOne filteredArrayUsingPredicate:targetPredicate];
+    NSMutableArray *bothProfiles = [NSMutableArray new];
+    [bothProfiles addObject:[filterTwo firstObject]];
+     targetPredicate = [NSPredicate predicateWithFormat:@"(Target == %@)", @"Release"];
+    filterTwo = [filterOne filteredArrayUsingPredicate:targetPredicate];
+    [bothProfiles addObject:[filterTwo firstObject]];
+    return bothProfiles;
+
+}
 
 
 //this is where all the arrays are created of who is valid, invalid, duplicate etc...
@@ -419,7 +446,7 @@
     NSMutableArray *_invalids = [NSMutableArray new];
     NSMutableArray *_expired = [NSMutableArray new];
     NSMutableArray *_duplicates = [NSMutableArray new];
-    NSArray *devCert = [self devCerts];
+   // NSArray *devCert = [self devCerts];
     NSString *profileDir = [self provisioningProfilesPath];
     NSArray *fileArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:profileDir error:nil];
     for (NSString *theObject in fileArray)
@@ -431,7 +458,7 @@
                                            [profileDir stringByAppendingPathComponent:theObject]];
             
             NSString *csid = provisionDict[@"CODE_SIGN_IDENTITY"];
-            NSString *teamId = [provisionDict[@"TeamIdentifier"] lastObject];
+           // NSString *teamId = [provisionDict[@"TeamIdentifier"] lastObject];
             NSDate *expireDate = provisionDict[@"ExpirationDate"];
             NSDate *createdDate = provisionDict[@"CreationDate"];
             NSString *name = provisionDict[@"Name"];
@@ -512,6 +539,12 @@
 
 + (NSString *)pathFromUUID:(NSString *)uuid
 {
+    NSString *thePath = [[[self provisioningProfilesPath] stringByAppendingPathComponent:uuid] stringByAppendingPathExtension:@"mobileprovision"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:thePath])
+    {
+        NSLog(@"provisioning profile not found: %@", thePath);
+        return nil;
+    }
     return [[[self provisioningProfilesPath] stringByAppendingPathComponent:uuid] stringByAppendingPathExtension:@"mobileprovision"];
 }
 
@@ -565,6 +598,11 @@
     
     //yay categories!! convert the dictionary raw string into an actual NSDictionary
     NSMutableDictionary *dict = [plistString dictionaryFromString];
+    
+    
+    NSString *appID = [dict[@"Entitlements"] objectForKey:@"application-identifier"];
+    
+    [dict setObject:appID forKey:@"applicationIdentifier"];
     
     //since we will always need this data, best to grab it here and make it part of the dictionary for easy re-use / validity check.
     

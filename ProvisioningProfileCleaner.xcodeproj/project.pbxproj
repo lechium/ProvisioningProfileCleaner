@@ -342,9 +342,12 @@
 		323932DE1993CFA000BD549E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Distribution: GlobalMedia Group, LLC (3FA2E7UF68)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: GlobalMedia Group, LLC (3FA2E7UF68)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ProvisioningProfileCleaner/ProvisioningProfileCleaner-Prefix.pch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "24F22887-39B6-42B7-87BD-59E4F6CE2994";
 			};
 			name = Debug;
 		};
