@@ -210,7 +210,8 @@
             NSString *appIDName = invalidDict[@"AppIDName"];
             NSString *appID = [invalidDict[@"Entitlements"] objectForKey:@"application-identifier"];
             NSString *fileName = [invalidDict[@"Path"] lastPathComponent];
-            NSString *profileInfo = [NSString stringWithFormat:@"Profile %@ is invalid (there is no matching valid certificate!)\nit expires on %@ with team: %@ (%@) profile name: %@ \nappID: %@ appIDName: %@\n\n", fileName, expireDate,teamName,teamId, name, appID, appIDName];
+            NSArray *validCerts = invalidDict[@"CodeSignArray"];
+            NSString *profileInfo = [NSString stringWithFormat:@"Profile %@ is invalid (there is no matching valid certificate!)\nit expires on %@ with team: %@ (%@) profile name: %@ \nappID: %@ appIDName: %@ missing expected certs: %@\n\n", fileName, expireDate,teamName,teamId, name, appID, appIDName, validCerts];
             [logString appendString:profileInfo];
             
         }
