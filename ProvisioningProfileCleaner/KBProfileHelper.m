@@ -410,32 +410,109 @@
 
 //#define ESSENTIAL_PREDICATE @"(SELF CONTAINS[c] Essential) OR (Tag contains[c] 'essential') OR (Priority == 'required') or (Package == 'com.science')"
 
-- (NSDictionary *)validProfileForID:(NSString *)appID withTarget:(NSString *)target
++ (NSDictionary *)validProfileForID:(NSString *)appID withTarget:(NSString *)target
 {
-    NSArray *validProfiles = [self validProfiles];
+    NSArray *validProfiles = [self validProfilesSlim];
     NSPredicate *filterPredicate = [NSPredicate predicateWithFormat:@"(applicationIdentifier contains[c] '%@') or (applicationIdentifier contains[c] '*')", appID];
+  
     NSPredicate *targetPredicate = [NSPredicate predicateWithFormat:@"(Target == %@)", target];
-    NSArray *filterOne = [validProfiles filteredArrayUsingPredicate:filterPredicate];
-    NSArray *filterTwo = [filterOne filteredArrayUsingPredicate:targetPredicate];
-    return [filterTwo firstObject];
+    NSPredicate *thePred = [NSCompoundPredicate andPredicateWithSubpredicates:@[filterPredicate, targetPredicate]];
+    NSArray *filterOne = [validProfiles filteredArrayUsingPredicate:thePred];
+    //NSArray *filterTwo = [filterOne filteredArrayUsingPredicate:targetPredicate];
+    return [filterOne firstObject];
 }
 
-- (NSArray *)validProfilesForID:(NSString *)appID
++ (NSArray *)validProfilesForID:(NSString *)appID
 {
-    NSArray *validProfiles = [self validProfiles];
+    NSMutableArray *bothProfiles = [NSMutableArray new];
+    NSArray *validProfiles = [self validProfilesSlim];
     NSPredicate *filterPredicate = [NSPredicate predicateWithFormat:@"(applicationIdentifier contains[c] '%@') or (applicationIdentifier contains[c] '*')", appID];
     NSPredicate *targetPredicate = [NSPredicate predicateWithFormat:@"(Target == %@)", @"Debug"];
-    NSArray *filterOne = [validProfiles filteredArrayUsingPredicate:filterPredicate];
-    NSArray *filterTwo = [filterOne filteredArrayUsingPredicate:targetPredicate];
-    NSMutableArray *bothProfiles = [NSMutableArray new];
-    [bothProfiles addObject:[filterTwo firstObject]];
-     targetPredicate = [NSPredicate predicateWithFormat:@"(Target == %@)", @"Release"];
-    filterTwo = [filterOne filteredArrayUsingPredicate:targetPredicate];
-    [bothProfiles addObject:[filterTwo firstObject]];
+    NSPredicate *thePred = [NSCompoundPredicate andPredicateWithSubpredicates:@[filterPredicate, targetPredicate]];
+    NSArray *profileFilter = [validProfiles filteredArrayUsingPredicate:thePred];
+    [bothProfiles addObject:[profileFilter firstObject]];
+    targetPredicate = [NSPredicate predicateWithFormat:@"(Target == %@)", @"Release"];
+    thePred = [NSCompoundPredicate andPredicateWithSubpredicates:@[filterPredicate, targetPredicate]];
+    profileFilter = [validProfiles filteredArrayUsingPredicate:thePred];
+    [bothProfiles addObject:[profileFilter firstObject]];
     return bothProfiles;
 
 }
 
+
++ (NSArray *)validProfilesSlim
+{
+    NSMutableArray *profileArray = [NSMutableArray new];
+    NSMutableArray *profileNames = [NSMutableArray new];
+
+    NSString *profileDir = [self provisioningProfilesPath];
+    NSArray *fileArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:profileDir error:nil];
+    for (NSString *theObject in fileArray)
+    {
+        if ([[[theObject pathExtension] lowercaseString] isEqualToString:@"mobileprovision"])
+        {
+            NSString *fullPath = [profileDir stringByAppendingPathComponent:theObject];
+            NSMutableDictionary *provisionDict = [KBProfileHelper provisioningDictionaryFromFilePath:
+                                                  [profileDir stringByAppendingPathComponent:theObject]];
+            
+            NSString *csid = provisionDict[@"CODE_SIGN_IDENTITY"];
+            NSDate *expireDate = provisionDict[@"ExpirationDate"];
+            NSDate *createdDate = provisionDict[@"CreationDate"];
+            NSString *name = provisionDict[@"Name"];
+            [provisionDict setObject:fullPath forKey:@"Path"];
+            BOOL expired = FALSE;
+            
+            if ([expireDate isGreaterThan:[NSDate date]])
+            {
+                //     DLog(@"not expired: %@", expireDate);
+                
+            } else {
+                
+                //its expired, who cares about any of the other details. add it to the expired list.
+                
+                DLog(@"expired: %@\n", expireDate);
+                expired = TRUE;
+            }
+            
+            //check to see if our valid non expired certificates in our keychain are referenced by the profile, or if its expired
+            
+            if (csid == nil || expired == TRUE)
+            {
+                
+                //trimmed
+                
+            } else { //we got this far the profile is not expired and can be compared against other potential duplicates
+                
+                if ([profileNames containsObject:name]) //we have this profile already, is ours newer or is the one already in our collection newer?
+                {
+                    NSDictionary *otherDict = [[profileArray subarrayWithName:name] objectAtIndex:0];
+                    NSDate *previousCreationDate = otherDict[@"CreationDate"];
+                    if ([previousCreationDate isGreaterThan:createdDate])
+                    {
+                        DLog(@"found repeat name, but we're older: %@ vs: %@\n", createdDate, previousCreationDate);
+                        
+                    } else {
+                        
+                        DLog(@"found a newer profile: %@ replace the old one: %@\n", createdDate, previousCreationDate);
+                        [profileArray removeObject:otherDict];
+                        [profileArray addObject:provisionDict];
+                    }
+                    
+                } else {
+                    
+                    //we dont have this name on record and it should be a valid profile!
+                    
+                    [profileArray addObject:provisionDict];
+                    [profileNames addObject:name];
+                    
+                }
+                
+            }
+        }
+    }
+
+    return profileArray;
+}
 
 //this is where all the arrays are created of who is valid, invalid, duplicate etc...
 

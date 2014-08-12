@@ -71,13 +71,13 @@ static XCProfileCleaner *sharedPlugin;
         
         //experimental right now
         
-      //  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(workspaceScanned:) name:@"IDESourceControlDidScanWorkspaceNotification" object:nil];
+     //  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(workspaceScanned:) name:@"IDESourceControlDidScanWorkspaceNotification" object:nil];
         
         static dispatch_once_t onceToken2;
         dispatch_once(&onceToken2, ^{
             
             //turn off the swizzling for now, everything inside there is experimental.
-          // [self doSwizzlingScience];
+         // [self doSwizzlingScience];
         });
     }
     return self;
@@ -85,8 +85,6 @@ static XCProfileCleaner *sharedPlugin;
 
 - (void)workspaceScanned:(NSNotification *)n
 {
-    
-    NSArray *devCerts = [KBProfileHelper devCertsFull];
     NSString *scannedWorkspace = [[[[[n object] workspace] representingFilePath] fileURL] path];
     NSLog(@"#### scanned workspace: %@", scannedWorkspace);
     id project = [objc_getClass("PBXProject") projectWithFile:scannedWorkspace];
@@ -94,17 +92,28 @@ static XCProfileCleaner *sharedPlugin;
     
     NSLog(@"#### evaluating project named: %@", productName);
     
-    id cmdTarget = [project targetNamed: productName];
-    BOOL iphoneRequired = [[cmdTarget productSettingForKey:@"LSRequiresIPhoneOS"] boolValue];
-    id targetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Debug"];
-    id rlsTargetContext = [cmdTarget cachedPropertyInfoContextForConfigurationNamed:@"Release"];
-    NSString *productID = [cmdTarget productSettingForKey:@"CFBundleIdentifier"];
+    id mainTarget = [project targetNamed: productName];
+   
+    BOOL iphoneRequired = [[mainTarget productSettingForKey:@"LSRequiresIPhoneOS"] boolValue];
+
+    if (iphoneRequired == TRUE)
+    {
+        [self validateProductTargetConfig:@"Debug" onTarget:mainTarget];
+        [self validateProductTargetConfig:@"Release" onTarget:mainTarget];
+    }
+
+}
+
+- (void)validateProductTargetConfig:(NSString *)targetConfig onTarget:(id)mainTarget
+{
+     NSArray *devCerts = [KBProfileHelper devCertsFull];
+    BOOL iphoneRequired = [[mainTarget productSettingForKey:@"LSRequiresIPhoneOS"] boolValue];
+    id targetContext = [mainTarget cachedPropertyInfoContextForConfigurationNamed:targetConfig];
+    NSString *productID = [mainTarget productSettingForKey:@"CFBundleIdentifier"];
     
     NSString *provProfile = [targetContext expandedValueForPropertyNamed:@"PROVISIONING_PROFILE"];
     NSString *codeSignID = [targetContext expandedValueForPropertyNamed:@"CODE_SIGN_IDENTITY"];
-    
-    
-   
+
     if (provProfile != nil || iphoneRequired == TRUE) // we dont care otherwise, no mac support yet
     {
         /* if codesignID length is 0 then it probably means they have "Automatic" set for the developer choice, we don't want to disrupt that and am
@@ -116,7 +125,7 @@ static XCProfileCleaner *sharedPlugin;
             
         } else {
             
-            NSLog(@"#### %@ is not a valid code sign ID for project: %@ Certificate expiration is possible explanation", codeSignID, productName);
+            NSLog(@"#### %@ is not a valid code sign ID for project: %@ Certificate expiration is possible explanation", codeSignID, [mainTarget name]);
             
         }
         
@@ -124,7 +133,7 @@ static XCProfileCleaner *sharedPlugin;
         if (![[NSFileManager defaultManager] fileExistsAtPath:provProfilePath])
         {
             NSLog(@"### provisioning profile %@ is missing!!!", provProfilePath);
-          //  return;
+            //  return;
         }
         
         NSDictionary *currentProvProfile = [KBProfileHelper provisioningDictionaryFromFilePath:[KBProfileHelper pathFromUUID:provProfile]];
@@ -132,9 +141,8 @@ static XCProfileCleaner *sharedPlugin;
         if (myCodesignID == nil)
         {
             NSLog(@"### current provisioning profile: %@ is invalid", currentProvProfile);
-            
-            KBProfileHelper *helper = [[KBProfileHelper alloc] init];
-            NSDictionary *validProfile = [helper validProfileForID:productID withTarget:@"Debug"];
+
+            NSDictionary *validProfile = [KBProfileHelper validProfileForID:productID withTarget:targetConfig];
             if (validProfile != nil)
             {
                 NSLog(@"### found a valid profile, should change to it: %@", validProfile[@"Name"]);
@@ -150,12 +158,9 @@ static XCProfileCleaner *sharedPlugin;
             
             
         }
-    }
-    
-    
 
 }
-
+}
 /*
  
  TeamName,

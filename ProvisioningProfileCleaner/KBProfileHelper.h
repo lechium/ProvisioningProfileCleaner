@@ -22,7 +22,7 @@
 + (NSString *)provisioningProfilesPath;
 + (NSString *)pathFromUUID:(NSString *)uuid;
 + (NSString *)iphoneDeveloperString;
-//- (NSDictionary *)validProfileForID:(NSString *)appID;
-- (NSDictionary *)validProfileForID:(NSString *)appID withTarget:(NSString *)target;
-- (NSArray *)validProfilesForID:(NSString *)appID;
++ (NSArray *)validProfilesSlim;
++ (NSDictionary *)validProfileForID:(NSString *)appID withTarget:(NSString *)target;
++ (NSArray *)validProfilesForID:(NSString *)appID;
 @end
