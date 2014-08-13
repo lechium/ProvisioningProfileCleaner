@@ -19,6 +19,8 @@
 		327422D71995743B00527711 /* XCPCModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 327422D61995743B00527711 /* XCPCModel.m */; };
 		327422DA1995747E00527711 /* XCPCProjectSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 327422D91995747E00527711 /* XCPCProjectSetting.m */; };
 		327422DD1995751300527711 /* NSData+Split.m in Sources */ = {isa = PBXBuildFile; fileRef = 327422DC1995751300527711 /* NSData+Split.m */; };
+		32D113D3199C0BE000D3F7F3 /* XCPCWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D113D1199C0BE000D3F7F3 /* XCPCWindowController.m */; };
+		32D113D4199C0BE000D3F7F3 /* XCPCWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32D113D2199C0BE000D3F7F3 /* XCPCWindowController.xib */; };
 		32FAA1D3199541120041ECDB /* JRSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FAA1D2199541120041ECDB /* JRSwizzle.m */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +38,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3225FF1D199C0FA200F6DC98 /* Defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Defines.h; sourceTree = "<group>"; };
 		323932CF1993CF9F00BD549E /* ProvisioningProfileCleaner */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ProvisioningProfileCleaner; sourceTree = BUILT_PRODUCTS_DIR; };
 		323932D21993CF9F00BD549E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		323932D51993CFA000BD549E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -56,6 +59,9 @@
 		327422D91995747E00527711 /* XCPCProjectSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCPCProjectSetting.m; sourceTree = "<group>"; };
 		327422DB1995751300527711 /* NSData+Split.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Split.h"; sourceTree = "<group>"; };
 		327422DC1995751300527711 /* NSData+Split.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Split.m"; sourceTree = "<group>"; };
+		32D113D0199C0BE000D3F7F3 /* XCPCWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XCPCWindowController.h; sourceTree = "<group>"; };
+		32D113D1199C0BE000D3F7F3 /* XCPCWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCPCWindowController.m; sourceTree = "<group>"; };
+		32D113D2199C0BE000D3F7F3 /* XCPCWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = XCPCWindowController.xib; sourceTree = "<group>"; };
 		32FAA1D1199541120041ECDB /* JRSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JRSwizzle.h; path = XCProfileCleaner/JRSwizzle.h; sourceTree = SOURCE_ROOT; };
 		32FAA1D2199541120041ECDB /* JRSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JRSwizzle.m; path = XCProfileCleaner/JRSwizzle.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -132,16 +138,12 @@
 		323932EB19940A6600BD549E /* XCProfileCleaner */ = {
 			isa = PBXGroup;
 			children = (
-				327422DB1995751300527711 /* NSData+Split.h */,
-				327422DC1995751300527711 /* NSData+Split.m */,
-				327422D81995747E00527711 /* XCPCProjectSetting.h */,
-				327422D91995747E00527711 /* XCPCProjectSetting.m */,
-				327422D51995743B00527711 /* XCPCModel.h */,
-				327422D61995743B00527711 /* XCPCModel.m */,
-				32FAA1D1199541120041ECDB /* JRSwizzle.h */,
-				32FAA1D2199541120041ECDB /* JRSwizzle.m */,
+				32D113CF199C0BD300D3F7F3 /* Window Group */,
+				32952BD6199AD9530051914F /* Categories and Helpers */,
+				32952BD7199AD9670051914F /* Xcode Model */,
 				323932F119940A6600BD549E /* XCProfileCleaner.h */,
 				323932F219940A6600BD549E /* XCProfileCleaner.m */,
+				3225FF1D199C0FA200F6DC98 /* Defines.h */,
 				323932EC19940A6600BD549E /* Supporting Files */,
 			);
 			path = XCProfileCleaner;
@@ -155,6 +157,38 @@
 				323932F419940A6600BD549E /* XCProfileCleaner-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		32952BD6199AD9530051914F /* Categories and Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				327422DB1995751300527711 /* NSData+Split.h */,
+				327422DC1995751300527711 /* NSData+Split.m */,
+				32FAA1D1199541120041ECDB /* JRSwizzle.h */,
+				32FAA1D2199541120041ECDB /* JRSwizzle.m */,
+			);
+			name = "Categories and Helpers";
+			sourceTree = "<group>";
+		};
+		32952BD7199AD9670051914F /* Xcode Model */ = {
+			isa = PBXGroup;
+			children = (
+				327422D81995747E00527711 /* XCPCProjectSetting.h */,
+				327422D91995747E00527711 /* XCPCProjectSetting.m */,
+				327422D51995743B00527711 /* XCPCModel.h */,
+				327422D61995743B00527711 /* XCPCModel.m */,
+			);
+			name = "Xcode Model";
+			sourceTree = "<group>";
+		};
+		32D113CF199C0BD300D3F7F3 /* Window Group */ = {
+			isa = PBXGroup;
+			children = (
+				32D113D0199C0BE000D3F7F3 /* XCPCWindowController.h */,
+				32D113D1199C0BE000D3F7F3 /* XCPCWindowController.m */,
+				32D113D2199C0BE000D3F7F3 /* XCPCWindowController.xib */,
+			);
+			name = "Window Group";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -227,6 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				323932F019940A6600BD549E /* InfoPlist.strings in Resources */,
+				32D113D4199C0BE000D3F7F3 /* XCPCWindowController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +282,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				323932F819940C4800BD549E /* KBProfileHelper.m in Sources */,
+				32D113D3199C0BE000D3F7F3 /* XCPCWindowController.m in Sources */,
 				327422DD1995751300527711 /* NSData+Split.m in Sources */,
 				327422DA1995747E00527711 /* XCPCProjectSetting.m in Sources */,
 				327422D71995743B00527711 /* XCPCModel.m in Sources */,

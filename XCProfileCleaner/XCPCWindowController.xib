@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5053" systemVersion="13E28" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+    <dependencies>
+        <deployment defaultVersion="1080" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5053"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="XCPCWindowController">
+            <connections>
+                <outlet property="alertMeCheckbox" destination="qpY-Sy-Gbt" id="768-k2-Zvg"/>
+                <outlet property="scanProfilesCheckbox" destination="PoH-3L-Lan" id="0kL-rh-C4y"/>
+                <outlet property="scanProjectsCheckbox" destination="4an-9w-V5Q" id="8Oe-6a-d1F"/>
+                <outlet property="window" destination="kYE-WO-eY1" id="CHP-id-lVU"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application"/>
+        <userDefaultsController representsSharedInstance="YES" id="FDl-9p-JsC"/>
+        <window title="XCProfileCleaner Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="kYE-WO-eY1" customClass="NSPanel">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" utility="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="396" y="580" width="336" height="114"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1058"/>
+            <view key="contentView" id="1Jo-7n-0AE">
+                <rect key="frame" x="0.0" y="0.0" width="336" height="114"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <button id="PoH-3L-Lan">
+                        <rect key="frame" x="33" y="78" width="273" height="18"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="check" title="Scan provisioning profiles when opened" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="41b-UX-Ll9">
+                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <binding destination="FDl-9p-JsC" name="value" keyPath="values.kPCScanOpenedProfiles" id="qj1-6R-ZkO">
+                                <dictionary key="options">
+                                    <integer key="NSNullPlaceholder" value="1"/>
+                                    <bool key="NSValidatesImmediately" value="YES"/>
+                                </dictionary>
+                            </binding>
+                        </connections>
+                    </button>
+                    <button id="4an-9w-V5Q">
+                        <rect key="frame" x="33" y="53" width="216" height="18"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="check" title="Validate projects when opened" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Idi-Tf-kQ3">
+                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <binding destination="FDl-9p-JsC" name="value" keyPath="values.kPCScanOpenedProjects" id="UUe-Na-ARM">
+                                <dictionary key="options">
+                                    <integer key="NSNullPlaceholder" value="1"/>
+                                    <bool key="NSValidatesImmediately" value="YES"/>
+                                </dictionary>
+                            </binding>
+                        </connections>
+                    </button>
+                    <button id="qpY-Sy-Gbt">
+                        <rect key="frame" x="33" y="26" width="216" height="18"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="check" title="Alert me upon project changes" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="gs6-Xd-MLz">
+                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <binding destination="FDl-9p-JsC" name="value" keyPath="values.kPCAlertOnProjectChanges" id="Vrq-Cf-jsd">
+                                <dictionary key="options">
+                                    <integer key="NSNullPlaceholder" value="1"/>
+                                    <bool key="NSValidatesImmediately" value="YES"/>
+                                </dictionary>
+                            </binding>
+                        </connections>
+                    </button>
+                </subviews>
+            </view>
+            <connections>
+                <outlet property="delegate" destination="-2" id="l60-jN-1Uc"/>
+            </connections>
+        </window>
+    </objects>
+</document>

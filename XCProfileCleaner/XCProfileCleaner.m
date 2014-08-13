@@ -10,8 +10,8 @@
 #import "JRSwizzle.h"
 #import <objc/runtime.h>
 #import "XCPCModel.h"
-
 #import "KBProfileHelper.h"
+#import "XCPCWindowController.h"
 
 @interface NSString (additions)
 
@@ -36,9 +36,17 @@ static XCProfileCleaner *sharedPlugin;
 @interface XCProfileCleaner()
 
 @property (nonatomic, strong) NSBundle *bundle;
+@property (nonatomic, strong) XCPCWindowController* windowController;
+@property (nonatomic, strong) NSMutableArray *alertDetails;
 @end
 
 @implementation XCProfileCleaner
+
++ (void)initialize
+{
+    NSDictionary *appDefaults = @{kPCAlertOnProjectChanges: [NSNumber numberWithBool:TRUE], kPCScanOpenedProfiles: [NSNumber numberWithBool:TRUE], kPCScanOpenedProjects: [NSNumber numberWithBool:TRUE] };
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+}
 
 + (void)pluginDidLoad:(NSBundle *)plugin
 {
@@ -57,49 +65,74 @@ static XCProfileCleaner *sharedPlugin;
         // reference to plugin's bundle, for resource acccess
         self.bundle = plugin;
         
+        if (self.windowController == nil) {
+            XCPCWindowController* wc = [[XCPCWindowController alloc] initWithWindowNibName:@"XCPCWindowController"];
+            self.windowController = wc;
+            
+        }
+        self.alertDetails = [NSMutableArray new];
         // Create menu items, initialize UI, etc.
 
-        // Sample Menu Item:
         NSMenuItem *menuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
         if (menuItem) {
             [[menuItem submenu] addItem:[NSMenuItem separatorItem]];
+            
+            NSMenuItem *ppMenuItem = [[NSMenuItem alloc] init];
+            [ppMenuItem setTitle:@"Provisioning Profiles"];
+            
+            NSMenu *fullMenu = [[NSMenu alloc] initWithTitle:@""];
             NSMenuItem *actionMenuItem = [[NSMenuItem alloc] initWithTitle:@"Clean provisioning profiles..." action:@selector(cleanProfiles) keyEquivalent:@"c"];
             [actionMenuItem setKeyEquivalentModifierMask: NSCommandKeyMask | NSShiftKeyMask | NSAlternateKeyMask];
             [actionMenuItem setTarget:self];
-            [[menuItem submenu] addItem:actionMenuItem];
+            [fullMenu addItem:actionMenuItem];
+            NSMenuItem *prefItem = [[NSMenuItem alloc] initWithTitle:@"Show Preferences..." action:@selector(showPrefs:) keyEquivalent:@""];
+            [prefItem setTarget:self];
+            [fullMenu addItem:prefItem];
+           
+            [ppMenuItem setSubmenu:fullMenu];
+            [[menuItem submenu] addItem:ppMenuItem];
+          
         }
         
         //experimental right now
         
-     //  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(workspaceScanned:) name:@"IDESourceControlDidScanWorkspaceNotification" object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(workspaceScanned:) name:@"IDESourceControlDidScanWorkspaceNotification" object:nil];
         
         static dispatch_once_t onceToken2;
         dispatch_once(&onceToken2, ^{
             
             //turn off the swizzling for now, everything inside there is experimental.
-         // [self doSwizzlingScience];
+         [self doSwizzlingScience];
         });
     }
     return self;
 }
 
+- (void)showPrefs:(id)sender
+{
+    [self.windowController.window makeKeyAndOrderFront:nil];
+}
+
 - (void)workspaceScanned:(NSNotification *)n
 {
-    NSString *scannedWorkspace = [[[[[n object] workspace] representingFilePath] fileURL] path];
-    NSLog(@"#### scanned workspace: %@", scannedWorkspace);
-    id project = [objc_getClass("PBXProject") projectWithFile:scannedWorkspace];
-    NSString *productName = [project name];
-    
-    NSLog(@"#### evaluating project named: %@", productName);
-    
-    id mainTarget = [project targetNamed: productName];
-   
-    BOOL iphoneRequired = [[mainTarget productSettingForKey:@"LSRequiresIPhoneOS"] boolValue];
-
-    if (iphoneRequired == TRUE)
+    if ([UD boolForKey:kPCScanOpenedProjects] == TRUE)
     {
-        [self validateProductTargetConfig:@"Debug" onTarget:mainTarget];
-        [self validateProductTargetConfig:@"Release" onTarget:mainTarget];
+        NSString *scannedWorkspace = [[[[[n object] workspace] representingFilePath] fileURL] path];
+        NSLog(@"#### scanned workspace: %@", scannedWorkspace);
+        id project = [objc_getClass("PBXProject") projectWithFile:scannedWorkspace];
+        NSString *productName = [project name];
+        
+        NSLog(@"#### evaluating project named: %@", productName);
+        
+        id mainTarget = [project targetNamed: productName];
+        
+        BOOL iphoneRequired = [[mainTarget productSettingForKey:@"LSRequiresIPhoneOS"] boolValue];
+        
+        if (iphoneRequired == TRUE)
+        {
+            [self validateProductTargetConfig:@"Debug" onTarget:mainTarget];
+            [self validateProductTargetConfig:@"Release" onTarget:mainTarget];
+        }
     }
 
 }
@@ -153,12 +186,7 @@ static XCProfileCleaner *sharedPlugin;
                 [targetContext setValue:validProfile[@"CODE_SIGN_IDENTITY"] forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
                 
             }
-            
-            
-            
-            
         }
-
 }
 }
 /*
@@ -294,6 +322,8 @@ static XCProfileCleaner *sharedPlugin;
             NSString *profileName = currentProvProfile[@"Name"];
             
             //compare our current provisioing profile in this project with the name of the incoming one, if they match its a newer version and we make sure Xcode updates/propagates this change.
+ 
+            //FIXME: should probably do a sanity compare to make sure this profile is a) newer b) has more UDID's
             
             if ([openProfileName isEqualToString:profileName])
             {
@@ -309,6 +339,11 @@ static XCProfileCleaner *sharedPlugin;
                         [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
                         [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
                     }
+                    
+                    
+                    NSDictionary *updatedProfile = @{@"projectName": productName, @"profileName": openProfileName, @"reason": @"Newer profile", @"target": target};
+                    
+                    [self.alertDetails addObject:updatedProfile];
                     
                     return;
                     
@@ -337,6 +372,11 @@ static XCProfileCleaner *sharedPlugin;
                     [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY"];
                     [targetContext setValue:openID forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
                 }
+                
+                NSDictionary *updatedProfile = @{@"projectName": productName, @"profileName": openProfileName, @"reason": @"Expired/Invalid profile replaced", @"target": target};
+                
+                [self.alertDetails addObject:updatedProfile];
+                
             }
             
             
@@ -346,7 +386,41 @@ static XCProfileCleaner *sharedPlugin;
             
         }
     }
+    
+    [self showUpdateAlert];
+    
+    
 
+}
+
+- (NSString *)alertDetailString
+{
+    NSMutableString *newString = [NSMutableString new];
+    for (NSDictionary *detail in self.alertDetails)
+    {
+        NSString *detailString = [NSString stringWithFormat:@"Project %@ (%@) was updated to profile: %@ for reason: %@\n", detail[@"projectName"], detail[@"target"], detail[@"profileName"], detail[@"reason"]];
+        [newString appendString:detailString];
+    }
+    
+    return newString;
+}
+
+- (void)showUpdateAlert
+{
+    if ([UD boolForKey:kPCAlertOnProjectChanges] == TRUE)
+    {
+        
+        NSAlert *theAlert = [NSAlert alertWithMessageText:@"Projects Updated" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", [self alertDetailString]];
+        [theAlert setShowsSuppressionButton:TRUE];
+        [theAlert runModal];
+        NSInteger showButton = [[theAlert suppressionButton] state];
+        if (showButton == 1)
+        {
+            [UD setBool:false forKey:kPCAlertOnProjectChanges];
+        }
+    }
+    
+    [self.alertDetails removeAllObjects];
 }
 
 /*
@@ -374,20 +448,58 @@ static XCProfileCleaner *sharedPlugin;
     {
         if ([[[theFile pathExtension] lowercaseString] isEqualToString:@"mobileprovision"])
         {
-            [sharedPlugin processProfile:theFile];
+            if([UD boolForKey:kPCScanOpenedProfiles] == TRUE)
+            {
+                [sharedPlugin processProfile:theFile];
+            }
         }
     }
     return orig;
 }
 
+
+
+- (void)_setIssues:(id)arg1 forFilePath:(id)arg2 {}
+
+- (void)_ourSetIssues:(id)arg1 forFilePath:(id)arg2 {
+
+    NSLog(@"issuesClass: %@", NSStringFromClass([arg1 class]));
+    NSLog(@"setIssues: %@ forFilePath: %@", arg1, arg2);
+    [self _ourSetIssues:arg1 forFilePath:arg2];
+    
+}
+
+- (void)_addIssues:(id)arg1 { }
+
+- (void)_ourAddIssues:(id)arg1 {
+
+    NSLog(@"issuesClass: %@", NSStringFromClass([arg1 class]));
+    NSLog(@"_ourAddIssues: %@", arg1);
+    [self _ourAddIssues:arg1];
+    
+}
+
+
+/*
+ 
+ ws = window.document.workspace
+ ip = ws.issueManager
+ issueProviders = [ip valueForKey:"issueProviders"]
+ dp = [issueProviders objectAtIndex:5]
+ ig = ip.issueGroups
+ */
+
+
+
 - (void)doSwizzlingScience
 {
     
     Class xcAppClass = objc_getClass("IDEApplicationController");
+    
+    
     NSError *theError = nil;
     
     BOOL swizzleScience = FALSE;
-    
     
     Method ourFilesOpenReplacement = class_getInstanceMethod([self class], @selector(newOurApplication:openFiles:));
     class_addMethod(xcAppClass, @selector(newOurApplication:openFiles:), method_getImplementation(ourFilesOpenReplacement), method_getTypeEncoding(ourFilesOpenReplacement));
@@ -396,14 +508,46 @@ static XCProfileCleaner *sharedPlugin;
     
     if (swizzleScience == TRUE)
     {
-        NSLog(@"IDEApplicationController ourApplication:openFiles: replaced!");
+        NSLog(@"IDEApplicationController application:openFiles: replaced!");
     } else {
         
-        NSLog(@"IDEApplicationController ourApplication:openFiles: failed to replace with error(: %@", theError);
+        NSLog(@"IDEApplicationController application:openFiles: failed to replace with error(: %@", theError);
     }
     
-  
+    //just messin around with adding issues.
     
+    /*
+    
+    Class diagnosticIssueProvider = objc_getClass("IDEDiagnosticIssueProvider");
+    Class ifg = objc_getClass("IDEIssueFileGroup");
+    
+    Method ourSetIssuesReplacement = class_getInstanceMethod([self class], @selector(_ourSetIssues:forFilePath:));
+    class_addMethod(diagnosticIssueProvider, @selector(_ourSetIssues:forFilePath:), method_getImplementation(ourSetIssuesReplacement), method_getTypeEncoding(ourSetIssuesReplacement));
+    
+    swizzleScience = [diagnosticIssueProvider jr_swizzleMethod:@selector(_setIssues:forFilePath:) withMethod:@selector(_ourSetIssues:forFilePath:) error:&theError];
+    
+    if (swizzleScience == TRUE)
+    {
+        NSLog(@"IDEDiagnosticIssueProvider _setIssues:forFilePath: replaced!");
+    } else {
+        
+        NSLog(@"IDEDiagnosticIssueProvider _setIssues:forFilePath: failed to replace with error(: %@", theError);
+    }
+    
+    Method addIssuesReplacement = class_getInstanceMethod([self class], @selector(_ourAddIssues:));
+    class_addMethod(ifg, @selector(_ourAddIssues:), method_getImplementation(addIssuesReplacement), method_getTypeEncoding(addIssuesReplacement));
+    
+    swizzleScience = [ifg jr_swizzleMethod:@selector(_addIssues:) withMethod:@selector(_ourAddIssues:) error:&theError];
+    
+    if (swizzleScience == TRUE)
+    {
+        NSLog(@"IDEIssueFileGroup _addIssues: replaced!");
+    } else {
+        
+        NSLog(@"IDEIssueFileGroup _addIssues: failed to replace with error(: %@", theError);
+    }
+  
+    */
 }
 - (void)showProfileSuccessAlert
 {
