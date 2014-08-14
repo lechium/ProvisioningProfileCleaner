@@ -133,20 +133,22 @@ static XCProfileCleaner *sharedPlugin;
             [self validateProductTargetConfig:@"Debug" onTarget:mainTarget];
             [self validateProductTargetConfig:@"Release" onTarget:mainTarget];
         }
+        
+        [self showUpdateAlert];
     }
 
 }
 
 - (void)validateProductTargetConfig:(NSString *)targetConfig onTarget:(id)mainTarget
 {
-     NSArray *devCerts = [KBProfileHelper devCertsFull];
+    NSArray *devCerts = [KBProfileHelper devCertsFull];
     BOOL iphoneRequired = [[mainTarget productSettingForKey:@"LSRequiresIPhoneOS"] boolValue];
     id targetContext = [mainTarget cachedPropertyInfoContextForConfigurationNamed:targetConfig];
     NSString *productID = [mainTarget productSettingForKey:@"CFBundleIdentifier"];
     
     NSString *provProfile = [targetContext expandedValueForPropertyNamed:@"PROVISIONING_PROFILE"];
     NSString *codeSignID = [targetContext expandedValueForPropertyNamed:@"CODE_SIGN_IDENTITY"];
-
+    
     if (provProfile != nil || iphoneRequired == TRUE) // we dont care otherwise, no mac support yet
     {
         /* if codesignID length is 0 then it probably means they have "Automatic" set for the developer choice, we don't want to disrupt that and am
@@ -174,7 +176,7 @@ static XCProfileCleaner *sharedPlugin;
         if (myCodesignID == nil)
         {
             NSLog(@"### current provisioning profile: %@ is invalid", currentProvProfile);
-
+            
             NSDictionary *validProfile = [KBProfileHelper validProfileForID:productID withTarget:targetConfig];
             if (validProfile != nil)
             {
@@ -185,9 +187,17 @@ static XCProfileCleaner *sharedPlugin;
                 [targetContext setValue:validProfile[@"CODE_SIGN_IDENTITY"] forPropertyName:@"CODE_SIGN_IDENTITY"];
                 [targetContext setValue:validProfile[@"CODE_SIGN_IDENTITY"] forPropertyName:@"CODE_SIGN_IDENTITY" conditionSet:conditionSet];
                 
+                NSDictionary *updatedProfile = @{@"projectName": [mainTarget name], @"profileName": validProfile[@"Name"], @"reason": @"Replacing invalid cert/profile", @"target": targetConfig};
+                
+                [self.alertDetails addObject:updatedProfile];
+                
+                
             }
         }
-}
+        
+        
+        
+    }
 }
 /*
  
@@ -398,9 +408,11 @@ static XCProfileCleaner *sharedPlugin;
     NSMutableString *newString = [NSMutableString new];
     for (NSDictionary *detail in self.alertDetails)
     {
-        NSString *detailString = [NSString stringWithFormat:@"Project %@ (%@) was updated to profile: %@ for reason: %@\n", detail[@"projectName"], detail[@"target"], detail[@"profileName"], detail[@"reason"]];
+        NSString *detailString = [NSString stringWithFormat:@"Project '%@' target '%@' was updated to profile: '%@' for reason: %@\n\n", detail[@"projectName"], detail[@"target"], detail[@"profileName"], detail[@"reason"]];
         [newString appendString:detailString];
     }
+    
+    [newString appendString:@"\nThese settings can be changed in Product->Provisioning Profiles->Show Preferences"];
     
     return newString;
 }
@@ -410,13 +422,16 @@ static XCProfileCleaner *sharedPlugin;
     if ([UD boolForKey:kPCAlertOnProjectChanges] == TRUE)
     {
         
-        NSAlert *theAlert = [NSAlert alertWithMessageText:@"Projects Updated" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", [self alertDetailString]];
-        [theAlert setShowsSuppressionButton:TRUE];
-        [theAlert runModal];
-        NSInteger showButton = [[theAlert suppressionButton] state];
-        if (showButton == 1)
+        if (self.alertDetails.count > 0)
         {
-            [UD setBool:false forKey:kPCAlertOnProjectChanges];
+            NSAlert *theAlert = [NSAlert alertWithMessageText:@"Projects Updated" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", [self alertDetailString]];
+            [theAlert setShowsSuppressionButton:TRUE];
+            [theAlert runModal];
+            NSInteger showButton = [[theAlert suppressionButton] state];
+            if (showButton == 1)
+            {
+                [UD setBool:false forKey:kPCAlertOnProjectChanges];
+            }
         }
     }
     
