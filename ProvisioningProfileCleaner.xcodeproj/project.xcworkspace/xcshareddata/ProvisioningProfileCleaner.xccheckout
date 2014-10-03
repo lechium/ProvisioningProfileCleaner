@@ -10,29 +10,29 @@
 	<string>ProvisioningProfileCleaner</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>32C1A794-A1BB-4E31-8B83-2179AE303219</key>
+		<key>C834FE6AFF26758DD0FA473A0E147D9493903C1F</key>
 		<string>ssh://github.com/lechium/ProvisioningProfileCleaner.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>ProvisioningProfileCleaner.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>32C1A794-A1BB-4E31-8B83-2179AE303219</key>
+		<key>C834FE6AFF26758DD0FA473A0E147D9493903C1F</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>ssh://github.com/lechium/ProvisioningProfileCleaner.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>32C1A794-A1BB-4E31-8B83-2179AE303219</string>
+	<string>C834FE6AFF26758DD0FA473A0E147D9493903C1F</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>32C1A794-A1BB-4E31-8B83-2179AE303219</string>
+			<string>C834FE6AFF26758DD0FA473A0E147D9493903C1F</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ProvisioningProfileCleaner</string>
 		</dict>
