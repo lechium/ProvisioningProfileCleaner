@@ -59,6 +59,36 @@ static XCProfileCleaner *sharedPlugin;
     }
 }
 
+- (void)XCPDelayedSetup
+{
+    NSMenuItem *menuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
+    if (menuItem) {
+        [[menuItem submenu] addItem:[NSMenuItem separatorItem]];
+        
+        NSMenuItem *ppMenuItem = [[NSMenuItem alloc] init];
+        [ppMenuItem setTitle:@"Provisioning Profiles"];
+        
+        NSMenu *fullMenu = [[NSMenu alloc] initWithTitle:@""];
+        NSMenuItem *actionMenuItem = [[NSMenuItem alloc] initWithTitle:@"Clean provisioning profiles..." action:@selector(cleanProfiles) keyEquivalent:@"c"];
+        [actionMenuItem setKeyEquivalentModifierMask: NSCommandKeyMask | NSShiftKeyMask | NSAlternateKeyMask];
+        [actionMenuItem setTarget:self];
+        [fullMenu addItem:actionMenuItem];
+        NSMenuItem *prefItem = [[NSMenuItem alloc] initWithTitle:@"Show Preferences..." action:@selector(showPrefs:) keyEquivalent:@""];
+        [prefItem setTarget:self];
+        [fullMenu addItem:prefItem];
+        
+        [ppMenuItem setSubmenu:fullMenu];
+        [[menuItem submenu] addItem:ppMenuItem];
+        
+    }
+    static dispatch_once_t onceToken2;
+    dispatch_once(&onceToken2, ^{
+        
+        //turn off the swizzling for now, everything inside there is experimental.
+        [self doSwizzlingScience];
+    });
+}
+
 - (id)initWithBundle:(NSBundle *)plugin
 {
     if (self = [super init]) {
@@ -73,37 +103,14 @@ static XCProfileCleaner *sharedPlugin;
         self.alertDetails = [NSMutableArray new];
         // Create menu items, initialize UI, etc.
 
-        NSMenuItem *menuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
-        if (menuItem) {
-            [[menuItem submenu] addItem:[NSMenuItem separatorItem]];
-            
-            NSMenuItem *ppMenuItem = [[NSMenuItem alloc] init];
-            [ppMenuItem setTitle:@"Provisioning Profiles"];
-            
-            NSMenu *fullMenu = [[NSMenu alloc] initWithTitle:@""];
-            NSMenuItem *actionMenuItem = [[NSMenuItem alloc] initWithTitle:@"Clean provisioning profiles..." action:@selector(cleanProfiles) keyEquivalent:@"c"];
-            [actionMenuItem setKeyEquivalentModifierMask: NSCommandKeyMask | NSShiftKeyMask | NSAlternateKeyMask];
-            [actionMenuItem setTarget:self];
-            [fullMenu addItem:actionMenuItem];
-            NSMenuItem *prefItem = [[NSMenuItem alloc] initWithTitle:@"Show Preferences..." action:@selector(showPrefs:) keyEquivalent:@""];
-            [prefItem setTarget:self];
-            [fullMenu addItem:prefItem];
-           
-            [ppMenuItem setSubmenu:fullMenu];
-            [[menuItem submenu] addItem:ppMenuItem];
-          
-        }
         
         //experimental right now
         
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(workspaceScanned:) name:@"IDESourceControlDidScanWorkspaceNotification" object:nil];
         
-        static dispatch_once_t onceToken2;
-        dispatch_once(&onceToken2, ^{
-            
-            //turn off the swizzling for now, everything inside there is experimental.
-         [self doSwizzlingScience];
-        });
+       
+        [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(XCPDelayedSetup) userInfo:nil repeats:FALSE];
+        
     }
     return self;
 }
