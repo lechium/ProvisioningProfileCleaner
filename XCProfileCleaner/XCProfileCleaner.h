@@ -10,4 +10,6 @@
 
 @interface XCProfileCleaner : NSObject
 
+@property (nonatomic, strong) NSMutableArray *scannedProjects;
+
 @end

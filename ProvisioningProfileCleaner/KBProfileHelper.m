@@ -275,10 +275,12 @@
                 NSString *certID = [[certArray lastObject] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@") "]];
                 //  DLog(@"certId: -%@-", certID);
                 NSString *devName = [[certArray objectAtIndex:0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-                if (certID != nil && devName != nil);
+                if (certID != nil && devName != nil){
                // NSDictionary *certDict = @{@"certID": certID, @"devName": devName};
                 [outputArray addObject:certID];
-                //  DLog(@"%@", clipIt);
+                    //  DLog(@"%@", clipIt);
+                    
+                }
                 
             }
         }

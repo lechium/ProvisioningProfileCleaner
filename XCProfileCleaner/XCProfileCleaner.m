@@ -101,6 +101,7 @@ static XCProfileCleaner *sharedPlugin;
             
         }
         self.alertDetails = [NSMutableArray new];
+        self.scannedProjects = [NSMutableArray new];
         // Create menu items, initialize UI, etc.
 
         
@@ -129,8 +130,18 @@ static XCProfileCleaner *sharedPlugin;
         id project = [objc_getClass("PBXProject") projectWithFile:scannedWorkspace];
         NSString *productName = [project name];
         
-        NSLog(@"#### evaluating project named: %@", productName);
         
+        
+        if ([[self scannedProjects] containsObject:productName])
+        {
+            NSLog(@"#### already scanned %@", productName);
+            return;
+        }
+        
+        if (productName != nil) {
+            [[self scannedProjects] addObject:productName];
+        }
+        NSLog(@"#### evaluating project named: %@", productName);
         id mainTarget = [project targetNamed: productName];
         
         BOOL iphoneRequired = [[mainTarget productSettingForKey:@"LSRequiresIPhoneOS"] boolValue];
