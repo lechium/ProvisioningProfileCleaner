@@ -452,7 +452,8 @@
     NSArray *fileArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:profileDir error:nil];
     for (NSString *theObject in fileArray)
     {
-        if ([[[theObject pathExtension] lowercaseString] isEqualToString:@"mobileprovision"])
+        if ([[[theObject pathExtension] lowercaseString] isEqualToString:@"mobileprovision"] ||
+            [[[theObject pathExtension] lowercaseString] isEqualToString:@"provisionprofile"])
         {
             NSString *fullPath = [profileDir stringByAppendingPathComponent:theObject];
             NSMutableDictionary *provisionDict = [KBProfileHelper provisioningDictionaryFromFilePath:
@@ -531,7 +532,8 @@
     NSArray *fileArray = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:profileDir error:nil];
     for (NSString *theObject in fileArray)
     {
-        if ([[[theObject pathExtension] lowercaseString] isEqualToString:@"mobileprovision"])
+        if ([[[theObject pathExtension] lowercaseString] isEqualToString:@"mobileprovision"] ||
+            [[[theObject pathExtension] lowercaseString] isEqualToString:@"provisionprofile"])
         {
             NSString *fullPath = [profileDir stringByAppendingPathComponent:theObject];
             NSMutableDictionary *provisionDict = [KBProfileHelper provisioningDictionaryFromFilePath:
@@ -622,10 +624,13 @@
     NSString *thePath = [[[self provisioningProfilesPath] stringByAppendingPathComponent:uuid] stringByAppendingPathExtension:@"mobileprovision"];
     if (![[NSFileManager defaultManager] fileExistsAtPath:thePath])
     {
-        NSLog(@"provisioning profile not found: %@", thePath);
-        return nil;
+        thePath = [[[self provisioningProfilesPath] stringByAppendingPathComponent:uuid] stringByAppendingPathExtension:@"provisionprofile"];
+        if (![[NSFileManager defaultManager] fileExistsAtPath:thePath]) {
+            NSLog(@"provisioning profile not found: %@", thePath);
+            return nil;
+        }
     }
-    return [[[self provisioningProfilesPath] stringByAppendingPathComponent:uuid] stringByAppendingPathExtension:@"mobileprovision"];
+    return thePath;
 }
 
 //sort of obsolete, used to take the valid profiles and copy them out for the original POC
@@ -636,8 +641,10 @@
     NSArray *profiles = [self validProfiles];
     for (NSDictionary *profile in profiles)
     {
-        NSString *filePath = [[[self provisioningProfilesPath] stringByAppendingPathComponent:profile[@"UUID"]] stringByAppendingPathExtension:@"mobileprovision"];
-        [pathArray addObject:filePath];
+        NSString *filePath = [[self class] pathFromUUID:profile[@"UUID"]];
+        if (filePath != nil) {
+            [pathArray addObject:filePath];
+        }
     }
     return pathArray;
 }
@@ -682,6 +689,9 @@
     
     NSString *appID = [dict[@"Entitlements"] objectForKey:@"application-identifier"];
     
+    if (appID == nil) {
+        appID = [dict[@"Entitlements"] objectForKey:@"com.apple.application-identifier"];
+    }
     [dict setObject:appID forKey:@"applicationIdentifier"];
     
     //since we will always need this data, best to grab it here and make it part of the dictionary for easy re-use / validity check.
