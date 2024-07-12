@@ -236,12 +236,18 @@
 			attributes = {
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = nito;
+				TargetAttributes = {
+					323932CE1993CF9F00BD549E = {
+						ProvisioningStyle = Manual;
+					};
+				};
 			};
 			buildConfigurationList = 323932CA1993CF9F00BD549E /* Build configuration list for PBXProject "ProvisioningProfileCleaner" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 323932C61993CF9F00BD549E;
@@ -378,20 +384,25 @@
 		323932DE1993CFA000BD549E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Distribution: GlobalMedia Group, LLC (3FA2E7UF68)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: GlobalMedia Group, LLC (3FA2E7UF68)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ProvisioningProfileCleaner/ProvisioningProfileCleaner-Prefix.pch";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "24F22887-39B6-42B7-87BD-59E4F6CE2994";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		323932DF1993CFA000BD549E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ProvisioningProfileCleaner/ProvisioningProfileCleaner-Prefix.pch";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
